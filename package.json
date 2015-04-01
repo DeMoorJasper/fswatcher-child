@@ -1,6 +1,6 @@
 {
   "name": "chokidar-child",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "wrap chokidar in a children process, so that it is crash free",
   "main": "index.js",
   "scripts": {
