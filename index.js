@@ -15,19 +15,19 @@ function Watcher (path, opts) {
   this.path = path
   this.opts = opts
 
-  this._startChildren()
+  this._startChild()
 }
 
 inherits(Watcher, EE)
 
-Watcher.prototype._startChildren = function () {
+Watcher.prototype._startChild = function () {
   var that = this
 
   if (this.child) {
     return
   }
 
-  this.child = fork(p.join(__dirname, 'children'))
+  this.child = fork(p.join(__dirname, 'child'))
 
   this.child.send({
     path: this.path,
@@ -48,9 +48,9 @@ Watcher.prototype._startChildren = function () {
       return
     }
 
-    that.emit('childrenDied', that.child.pid, exit, signal)
+    that.emit('childDead', that.child.pid, exit, signal)
     that.child = null
-    that._startChildren()
+    that._startChild()
   })
 }
 

@@ -1,7 +1,7 @@
-# chokidar-children [![Build Status](https://travis-ci.org/mcollina/chokidar-children.png)](https://travis-ci.org/chokidar-children/mqemitter)
+# chokidar-child [![Build Status](https://travis-ci.org/mcollina/chokidar-child.png)](https://travis-ci.org/mcollina/chokidar-child)
 
 
-Wrap [chokidar](http://npm.im/chokidar) in a children process, so that it is crash free.
+Wrap [chokidar](http://npm.im/chokidar) in a child process, so that it is crash free.
 
 This is an _ugly hack_ that works for me
 

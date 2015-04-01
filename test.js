@@ -35,7 +35,7 @@ test('restart the watcher if it dies', function (t) {
       ignored: 'afile.js'
     })
 
-    watcher.on('childrenDied', function (pid, exit, signal) {
+    watcher.on('childDead', function (pid, exit, signal) {
       t.equal(pid, watcher.child.pid, 'pid matches')
       t.equal(exit, null, 'exit code matches')
       t.equal(signal, 'SIGKILL', 'signal matches')

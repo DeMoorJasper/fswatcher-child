@@ -1,5 +1,5 @@
 {
-  "name": "chokidar-children",
+  "name": "chokidar-child",
   "version": "0.1.0",
   "description": "wrap chokidar in a children process, so that it is crash free",
   "main": "index.js",
@@ -13,11 +13,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/mcollina/chokidar-children.git"
+    "url": "https://github.com/mcollina/chokidar-child.git"
   },
   "keywords": [
     "chokidar",
-    "children",
+    "child",
+    "process",
     "fsevents",
     "nscale"
   ],
