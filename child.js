@@ -12,6 +12,6 @@ process.once('message', function (msg) {
 
 process.on('error', function () {})
 
-process.on('disconnect', function() {
-  process.exit();
-});
+process.on('disconnect', function () {
+  process.exit()
+})
