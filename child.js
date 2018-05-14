@@ -1,17 +1,40 @@
-'use strict'
+const { FSWatcher } = require('chokidar');
 
-var watch = require('chokidar').watch
+let watcher;
 
-process.once('message', function (msg) {
-  var watcher = watch(msg.path, msg.opts)
+function init(options) {
+  watcher = new FSWatcher(options);
+  watcher.on('all', (event, path) => {
+    console.log('EVENT: ', event);
+    process.send({
+      event: event,
+      path: path
+    });
+  });
+}
 
-  watcher.on('all', function (event, path) {
-    process.send({ event: event, path: path })
-  })
-})
+function executeFunction(functionName, args) {
+  watcher[functionName](...args);
+}
 
-process.on('error', function () {})
+process.on('message', (msg) => {
+  switch(msg.type) {
+    case 'init':
+      init(msg.options);
+      break;
+    case 'function':
+      executeFunction(msg.name, msg.args);
+      break;
+    case 'die':
+      process.exit();
+      break;
+  }
+});
 
-process.on('disconnect', function () {
-  process.exit()
-})
+process.on('error', () => {
+  // Do nothing
+});
+
+process.on('disconnect', () => {
+  process.exit();
+});

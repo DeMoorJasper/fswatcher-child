@@ -1,73 +1,110 @@
-'use strict'
+const fork = require('child_process').fork;
+const {EventEmitter} = require('events');
+const path = require('path');
 
-var fork = require('child_process').fork
-var EE = require('events').EventEmitter
-var inherits = require('util').inherits
-var p = require('path')
+class Watcher extends EventEmitter {
+  constructor(options = {}) {
+    super();
+    this.options = options;
+    this.watchedPaths = new Set();
+    this.child = null;
 
-function nop () {}
-
-function Watcher (path, opts) {
-  if (!(this instanceof Watcher)) {
-    return new Watcher(path, opts)
+    this.startchild();
   }
 
-  this.path = path
-  this.opts = opts
+  startchild() {
+    if (this.child) return;
 
-  this._startChild()
-}
+    this.child = fork(path.join(__dirname, 'child'));
 
-inherits(Watcher, EE)
+    this.child.send({
+      type: 'init',
+      options: this.options
+    });
 
-Watcher.prototype._startChild = function () {
-  var that = this
-
-  if (this.child) {
-    return
-  }
-
-  this.child = fork(p.join(__dirname, 'child'))
-
-  this.child.send({
-    path: this.path,
-    opts: this.opts
-  })
-
-  this.child.on('message', function (msg) {
-    that.emit(msg.event, msg.path)
-    that.emit('all', msg.event, msg.path)
-  })
-
-  this.child.on('error', nop)
-
-  this.child.on('exit', function (exit, signal) {
-    if (that.closing) {
-      that.closing = false
-      that.closed = true
-      return
+    if (this.watchedPaths.size > 0) {
+      this.sendCommand('add', [Array.from(this.watchedPaths)]);
     }
 
-    that.emit('childDead', that.child.pid, exit, signal)
-    that.child = null
-    that._startChild()
-  })
-}
+    this.child.on('message', msg => this.emit(msg.event, msg.path));
 
-Watcher.prototype.close = function (cb) {
-  if (this.child) {
-    this.closing = true
-    if (cb) {
-      this.child.on('exit', cb)
+    this.child.on('error', () => {
+      // Do nothing
+    });
+
+    this.child.on('exit', (exit, signal) => {
+      if (!this.closed) {
+        // Restart the child
+        this.child = null;
+        this.startchild();
+      }
+      this.emit('childDead');
+    });
+  }
+
+  sendCommand(f, args) {
+    this.child.send({
+      type: 'function',
+      name: f,
+      args: args
+    });
+  }
+
+  _addPath(p) {
+    if (!this.watchedPaths.has(p)) {
+      this.watchedPaths.add(p);
     }
+  }
 
-    var that = this
-    setImmediate(function () {
-      that.child.kill()
-    })
-  } else if (cb) {
-    setImmediate(cb)
+  add(paths) {
+    if (Array.isArray(paths)) {
+      for (let p of paths) {
+        this._addPath(p);
+      }
+    } else {
+      this._addPath(paths);
+    }
+    this.sendCommand('add', [paths]);
+  }
+
+  unwatch(paths) {
+    if (Array.isArray(paths)) {
+      for (let p of paths) {
+        this.watchedPaths.delete(p);
+      }
+    } else {
+      this.watchedPaths.delete(paths);
+    }
+    this.sendCommand('unwatch', [paths]);
+  }
+
+  getWatched() {
+    let watchList = {};
+    for (let p of this.watchedPaths) {
+      let key = this.options.cwd ? path.relative(this.options.cwd, p) : p;
+      // TODO: Implement _items so it's the same as chokidar's output
+      watchList[key || '.'] = [];
+    }
+    return watchList;
+  }
+
+  _closePath(p) {
+    if (this.watchedPaths.has(p)) {
+      this.watchedPaths.delete(p);
+    }
+    this.sendCommand('_closePath', [p]);
+  }
+
+  close() {
+    this.closed = true;
+    this.child.kill();
+  }
+
+  _emulateChildDead() {
+    this.child.send({
+      type: 'die'
+    });
   }
 }
 
-module.exports.watch = Watcher
+module.exports = Watcher;
