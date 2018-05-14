@@ -1,9 +1,11 @@
 const { FSWatcher } = require('chokidar');
+const segFaults = require('segfault-handler');
+
+segFaults.registerHandler();
 
 let watcher;
 
 function sendEvent(event, path) {
-  console.log('EVENT: ', event);
   process.send({
     event: event,
     path: path
@@ -21,13 +23,13 @@ function init(options) {
 function executeFunction(functionName, args) {
   try {
     watcher[functionName](...args);
-  } catch(e) {
+  } catch (e) {
     // Do nothing
   }
 }
 
 process.on('message', (msg) => {
-  switch(msg.type) {
+  switch (msg.type)  {
     case 'init':
       init(msg.options);
       break;
@@ -40,7 +42,7 @@ process.on('message', (msg) => {
   }
 });
 
-process.on('error', () => {
+process.on('error', e => {
   // Do nothing
 });
 

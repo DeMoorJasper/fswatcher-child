@@ -1,6 +1,6 @@
 {
   "name": "fswatcher-child",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "wrap chokidar's FSWatcher in a child process, so that it is crash free",
   "main": "index.js",
   "scripts": {
@@ -19,7 +19,8 @@
   "author": "Jasper De Moor",
   "license": "MIT",
   "dependencies": {
-    "chokidar": "^2.0.3"
+    "chokidar": "^2.0.3",
+    "segfault-handler": "^1.0.0"
   },
   "devDependencies": {
     "fs-extra": "^6.0.1",
