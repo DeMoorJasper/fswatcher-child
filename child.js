@@ -2,15 +2,20 @@ const { FSWatcher } = require('chokidar');
 
 let watcher;
 
+function sendEvent(event, path) {
+  console.log('EVENT: ', event);
+  process.send({
+    event: event,
+    path: path
+  });
+}
+
 function init(options) {
   watcher = new FSWatcher(options);
   watcher.on('all', (event, path) => {
-    console.log('EVENT: ', event);
-    process.send({
-      event: event,
-      path: path
-    });
+    sendEvent(event, path);
   });
+  sendEvent('ready');
 }
 
 function executeFunction(functionName, args) {
