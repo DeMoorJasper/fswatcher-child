@@ -19,7 +19,11 @@ function init(options) {
 }
 
 function executeFunction(functionName, args) {
-  watcher[functionName](...args);
+  try {
+    watcher[functionName](...args);
+  } catch(e) {
+    // Do nothing
+  }
 }
 
 process.on('message', (msg) => {
