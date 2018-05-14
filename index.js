@@ -10,6 +10,7 @@ class Watcher extends EventEmitter {
     this.child = null;
     this.ready = false;
     this.readyQueue = [];
+    this.useWorker = process.platform === 'darwin';
 
     this.on('ready', () => {
       this.ready = true;
@@ -19,11 +20,17 @@ class Watcher extends EventEmitter {
       this.readyQueue = [];
     });
 
-    this.startchild();
+    if (!this.useWorker) {
+      const { FSWatcher } = require('chokidar');
+      this.localWatcher = new FSWatcher(this.options);
+      this.emit('ready');
+    } else {
+      this.startchild();
+    }
   }
 
   startchild() {
-    if (this.child) return;
+    if (this.child || !this.useWorker) return;
 
     this.child = fork(path.join(__dirname, 'child'));
 
@@ -54,6 +61,9 @@ class Watcher extends EventEmitter {
   }
 
   sendCommand(f, args) {
+    if (!this.useWorker) {
+      return this.localWatcher[f](...args);
+    }
     if (!this.ready) {
       return this.readyQueue.push(() => this.sendCommand(f, args));
     }
@@ -111,10 +121,15 @@ class Watcher extends EventEmitter {
 
   close() {
     this.closed = true;
-    this.child.kill();
+    if (this.child) {
+      this.child.kill();
+    }
   }
 
   _emulateChildDead() {
+    if (!this.child) {
+      return;
+    }
     this.child.send({
       type: 'die'
     });
