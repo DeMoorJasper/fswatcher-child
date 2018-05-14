@@ -1,7 +1,4 @@
 const { FSWatcher } = require('chokidar');
-const segFaults = require('segfault-handler');
-
-segFaults.registerHandler();
 
 let watcher;
 
