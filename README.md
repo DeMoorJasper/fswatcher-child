@@ -1,6 +1,7 @@
 # FSWatcher child
 
 [![Travis CI](https://travis-ci.org/DeMoorJasper/fswatcher-child.svg?branch=master)](https://travis-ci.org/DeMoorJasper/fswatcher-child)
+[![Build status](https://ci.appveyor.com/api/projects/status/a2m7aaiobutm65yf/branch/master?svg=true)](https://ci.appveyor.com/project/DeMoorJasper/fswatcher-child/branch/master)
 
 FSWatcher child is a wrapper around chokidar's FSWatcher to provide an error prone layer between your code and chokidar using a child process.
 
