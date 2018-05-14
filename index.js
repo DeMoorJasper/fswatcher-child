@@ -23,6 +23,7 @@ class Watcher extends EventEmitter {
     if (!this.useWorker) {
       const { FSWatcher } = require('chokidar');
       this.localWatcher = new FSWatcher(this.options);
+      this.localWatcher.on('all', this.emit);
       this.emit('ready');
     } else {
       this.startchild();
