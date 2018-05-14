@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/DeMoorJasper/chokidar-child.git"
+    "url": "https://github.com/DeMoorJasper/fswatcher-child.git"
   },
   "keywords": [
     "chokidar",
