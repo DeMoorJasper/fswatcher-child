@@ -20,7 +20,9 @@ describe('basic chokidar tests', function() {
     watcher.once('change', () => {
       changed = true;
     });
-    await new Promise(resolve => watcher.once('ready', resolve));
+    if (!watcher.ready) {
+      await new Promise(resolve => watcher.once('ready', resolve));
+    }
     await new Promise(resolve => setTimeout(resolve, 500));
     await fs.writeFile(filepath, 'this is not a text document');
     await new Promise(resolve => setTimeout(resolve, 500));
@@ -35,12 +37,15 @@ describe('basic chokidar tests', function() {
 
     let filepath = path.join(tmpFolder, 'file1.txt');
     await fs.writeFile(filepath, 'this is a text document');
+    await new Promise(resolve => setTimeout(resolve, 250));
     watcher.add(filepath);
     let changed = false;
     watcher.once('change', () => {
       changed = true;
     });
-    await new Promise(resolve => watcher.once('ready', resolve));
+    if (!watcher.ready) {
+      await new Promise(resolve => watcher.once('ready', resolve));
+    }
     await new Promise(resolve => setTimeout(resolve, 500));
     watcher.unwatch(filepath);
     await fs.writeFile(filepath, 'this is not a text document');
@@ -61,7 +66,9 @@ describe('basic chokidar tests', function() {
     watcher.once('change', () => {
       changed = true;
     });
-    await new Promise(resolve => watcher.once('ready', resolve));
+    if (!watcher.ready) {
+      await new Promise(resolve => watcher.once('ready', resolve));
+    }
     watcher._emulateChildDead();
     await new Promise(resolve => setTimeout(resolve, 500));
     await fs.writeFile(filepath, 'this is not a text document');

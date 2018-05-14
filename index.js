@@ -23,7 +23,7 @@ class Watcher extends EventEmitter {
     if (!this.useWorker) {
       const { FSWatcher } = require('chokidar');
       this.localWatcher = new FSWatcher(this.options);
-      this.localWatcher.on('all', this.emit);
+      this.localWatcher.on('all', this.emit.bind(this));
       this.emit('ready');
     } else {
       this.startchild();
@@ -63,16 +63,17 @@ class Watcher extends EventEmitter {
 
   sendCommand(f, args) {
     if (!this.useWorker) {
-      return this.localWatcher[f](...args);
+      this.localWatcher[f](...args);
+    } else {
+      if (!this.ready) {
+        return this.readyQueue.push(() => this.sendCommand(f, args));
+      }
+      this.child.send({
+        type: 'function',
+        name: f,
+        args: args
+      });
     }
-    if (!this.ready) {
-      return this.readyQueue.push(() => this.sendCommand(f, args));
-    }
-    this.child.send({
-      type: 'function',
-      name: f,
-      args: args
-    });
   }
 
   _addPath(p) {
@@ -124,6 +125,9 @@ class Watcher extends EventEmitter {
     this.closed = true;
     if (this.child) {
       this.child.kill();
+    }
+    if (this.localWatcher) {
+      this.localWatcher.close();
     }
   }
 
