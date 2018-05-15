@@ -1,6 +1,6 @@
 {
   "name": "fswatcher-child",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "wrap chokidar's FSWatcher in a child process, so that it is crash free",
   "main": "index.js",
   "scripts": {
