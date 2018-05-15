@@ -23,6 +23,7 @@ describe('basic chokidar tests', function() {
     if (!watcher.ready) {
       await new Promise(resolve => watcher.once('ready', resolve));
     }
+    await new Promise(resolve => setTimeout(resolve, 250));
     await fs.writeFile(filepath, 'this is not a text document');
     await new Promise(resolve => setTimeout(resolve, 500));
 
@@ -45,6 +46,7 @@ describe('basic chokidar tests', function() {
     if (!watcher.ready) {
       await new Promise(resolve => watcher.once('ready', resolve));
     }
+    await new Promise(resolve => setTimeout(resolve, 250));
     watcher.unwatch(filepath);
     await fs.writeFile(filepath, 'this is not a text document');
     await new Promise(resolve => setTimeout(resolve, 500));
@@ -67,6 +69,7 @@ describe('basic chokidar tests', function() {
     if (!watcher.ready) {
       await new Promise(resolve => watcher.once('ready', resolve));
     }
+    await new Promise(resolve => setTimeout(resolve, 250));
     watcher._emulateChildDead();
     await new Promise(resolve => setTimeout(resolve, 500));
     await fs.writeFile(filepath, 'this is not a text document');
