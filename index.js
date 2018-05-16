@@ -67,29 +67,32 @@ class Watcher extends EventEmitter {
   _addPath(p) {
     if (!this.watchedPaths.has(p)) {
       this.watchedPaths.add(p);
+      return true;
     }
   }
 
   add(paths) {
+    let added = false;
     if (Array.isArray(paths)) {
       for (let p of paths) {
-        this._addPath(p);
+        added = !added ? this._addPath(p) : true;
       }
     } else {
-      this._addPath(paths);
+      added = this._addPath(paths);
     }
-    this.sendCommand('add', [paths]);
+    if (added) this.sendCommand('add', [paths]);
   }
 
   unwatch(paths) {
+    let removed = false;
     if (Array.isArray(paths)) {
       for (let p of paths) {
-        this.watchedPaths.delete(p);
+        removed = !removed ? this.watchedPaths.delete(p) : true;
       }
     } else {
-      this.watchedPaths.delete(paths);
+      removed = this.watchedPaths.delete(paths);
     }
-    this.sendCommand('unwatch', [paths]);
+    if (removed) this.sendCommand('unwatch', [paths]);
   }
 
   getWatched() {
