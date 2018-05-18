@@ -93,7 +93,7 @@ describe('basic chokidar tests', function() {
     }
     await new Promise(resolve => setTimeout(resolve, 250));
     watcher._emulateChildDead();
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(resolve, 1000));
     await fs.writeFile(filepath, 'this is not a text document');
     await new Promise(resolve => setTimeout(resolve, 500));
 
