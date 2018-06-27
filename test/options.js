@@ -34,4 +34,85 @@ describe('options', function() {
 
     watcher.close();
   });
+
+  it('Should pass init options with a more complex ignored regex', async () => {
+    let watcher = new FSWatcher({
+      ignored: /file|config/
+    });
+
+    let filepaths = [
+      path.join(tmpFolder, 'file1.txt'), 
+      path.join(tmpFolder, 'config.json')
+    ];
+    
+    for (let filepath of filepaths) {
+      await fs.writeFile(filepath, 'this is a text document');
+
+      watcher.add(filepath);
+    }
+
+    let changed = false;
+    watcher.once('change', () => {
+      changed = true;
+    });
+
+    if (!watcher.ready) {
+      await new Promise(resolve => watcher.once('ready', resolve));
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 250));
+
+    for (let filepath of filepaths) {
+      await fs.writeFile(filepath, 'this is not a text document');
+
+      watcher.add(filepath);
+    }
+    
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    assert(!changed, 'File should not be flagged as changed.');
+
+    watcher.close();
+  });
+
+  it('Should not ignore any files outside of the regex', async () => {
+    let watcher = new FSWatcher({
+      ignored: /file|config/
+    });
+
+    let filepaths = [
+      path.join(tmpFolder, 'file1.txt'), 
+      path.join(tmpFolder, 'config.json'),
+      path.join(tmpFolder, 'something')
+    ];
+    
+    for (let filepath of filepaths) {
+      await fs.writeFile(filepath, 'this is a text document');
+
+      watcher.add(filepath);
+    }
+
+    let changed = 0;
+    watcher.once('change', () => {
+      changed++;
+    });
+
+    if (!watcher.ready) {
+      await new Promise(resolve => watcher.once('ready', resolve));
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 250));
+
+    for (let filepath of filepaths) {
+      await fs.writeFile(filepath, 'this is not a text document');
+
+      watcher.add(filepath);
+    }
+    
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    assert.equal(changed, 1, 'One file should have changed once.');
+
+    watcher.close();
+  });
 });
