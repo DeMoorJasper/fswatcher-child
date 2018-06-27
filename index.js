@@ -1,11 +1,12 @@
 const fork = require('child_process').fork;
 const { EventEmitter } = require('events');
 const path = require('path');
+const optionsTransfer = require('./options');
 
 class Watcher extends EventEmitter {
   constructor(options = {}) {
     super();
-    this.options = options;
+    this.options = optionsTransfer.encode(options);
     this.watchedPaths = new Set();
     this.child = null;
     this.ready = false;
