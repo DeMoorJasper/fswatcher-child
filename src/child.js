@@ -12,6 +12,7 @@ function sendEvent(event, path) {
 
 function init(options) {
   options = optionsTransfer.decode(options);
+  console.log(options);
   watcher = new FSWatcher(options);
   watcher.on('all', (event, path) => {
     sendEvent(event, path);

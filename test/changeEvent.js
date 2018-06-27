@@ -1,4 +1,4 @@
-const FSWatcher = require('../index');
+const FSWatcher = require('../src/index');
 const fs = require('fs-extra');
 const path = require('path');
 const assert = require('assert');
