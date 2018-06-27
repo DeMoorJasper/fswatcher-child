@@ -2,6 +2,7 @@
 node_modules
 
 # Lock files
+yarn.lock
 *.lock
 
 # Logs
