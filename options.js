@@ -4,10 +4,10 @@ function type(o) {
 
 /*
 input:
-{a:1, b:/x/, c:'d', f:{g:1}, h:[1,2,3]}
+{a:1, ignored:/x/, c:'d'}
 
 output:
-{a:1, b:x, c:'d', __regIndexs__: [0]}
+{a:1, ignored:['x'], c:'d', __regIndexs__: [0]}
 */
 function encode(o) {
   if (o && o.ignored) {
