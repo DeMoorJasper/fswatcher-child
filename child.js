@@ -1,4 +1,5 @@
 const { FSWatcher } = require('chokidar');
+const optionsTransfer = require('./options');
 
 let watcher;
 
@@ -10,6 +11,7 @@ function sendEvent(event, path) {
 }
 
 function init(options) {
+  options = optionsTransfer.decode(options);
   watcher = new FSWatcher(options);
   watcher.on('all', (event, path) => {
     sendEvent(event, path);
