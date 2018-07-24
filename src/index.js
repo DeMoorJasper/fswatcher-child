@@ -25,8 +25,18 @@ class Watcher extends EventEmitter {
 
   startchild() {
     if (this.child) return;
+    
+    let filteredArgs = process.execArgv.filter(
+      v => !/^--(debug|inspect)/.test(v)
+    );
 
-    this.child = fork(path.join(__dirname, 'child'));
+    let options = {
+      execArgv: filteredArgs,
+      env: process.env,
+      cwd: process.cwd()
+    };
+
+    this.child = fork(path.join(__dirname, 'child'), process.argv, options);
 
     if (this.watchedPaths.size > 0) {
       this.sendCommand('add', [Array.from(this.watchedPaths)]);
