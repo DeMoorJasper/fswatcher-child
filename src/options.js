@@ -1,47 +1,40 @@
-function type(o) {
-  return Object.prototype.toString.call(o).slice(8, -1);
+function type(options) {
+  return Object.prototype.toString.call(options).slice(8, -1);
 }
 
-/*
-input:
-{a:1, ignored:/x/, c:'d'}
-
-output:
-{a:1, ignored:['x'], c:'d', __regIndexs__: [0]}
-*/
-function encode(o) {
-  if (o && o.ignored) {
-    const ignoredType = type(o.ignored);
+function encode(options) {
+  if (options && options.ignored) {
+    const ignoredType = type(options.ignored);
     if (ignoredType !== 'Array') {
-      o.ignored = [o.ignored];
+      options.ignored = [options.ignored];
     }
 
-    o.ignored.forEach((val, index) => {
-      const valType = type(val)
-      if (valType === 'RegExp') {
-        o.ignored[index] = val.source;
-        if (!o.__regIndexs) {
-          o.__regIndexs = [];
+    options.ignored.forEach((value, index) => {
+      const valueType = type(value)
+      if (valueType === 'RegExp') {
+        options.ignored[index] = value.source;
+        if (!options.__regIndexs) {
+          options.__regIndexs = [];
         }
-        o.__regIndexs.push(index);
+        options.__regIndexs.push(index);
       }
     });
   }
 
-  return o;
+  return options;
 }
 
-function decode(o) {
-  if (o && o.ignored && o.__regIndexs) {
-    for (let index of o.__regIndexs) {
-      o.ignored[index] = new RegExp(o.ignored[index]);
+function decode(options) {
+  if (options && options.ignored && options.__regIndexs) {
+    for (let index of options.__regIndexs) {
+      options.ignored[index] = new RegExp(options.ignored[index]);
     }
   }
 
-  delete o.__regIndexs;
+  delete options.__regIndexs;
 
-  return o;
+  return options;
 }
 
-exports.encode = encode
-exports.decode = decode
+exports.encode = encode;
+exports.decode = decode;

@@ -4,7 +4,7 @@
   "description": "wrap chokidar's FSWatcher in a child process, so that it is crash free",
   "main": "./src/index.js",
   "scripts": {
-    "test": "mocha --timeout 2500 --require ./test/babel-register"
+    "test": "mocha --timeout 5000 --require ./test/babel-register"
   },
   "repository": {
     "type": "git",

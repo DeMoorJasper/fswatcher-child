@@ -1,6 +1,8 @@
 const fork = require('child_process').fork;
 const { EventEmitter } = require('events');
-const path = require('path');
+const { noop } = require('./utils');
+const { jsonToError } = require('./errorUtils');
+const Path = require('path');
 const optionsTransfer = require('./options');
 
 class Watcher extends EventEmitter {
@@ -14,8 +16,8 @@ class Watcher extends EventEmitter {
 
     this.on('ready', () => {
       this.ready = true;
-      for (let f of this.readyQueue) {
-        f();
+      for (let func of this.readyQueue) {
+        func();
       }
       this.readyQueue = [];
     });
@@ -36,7 +38,7 @@ class Watcher extends EventEmitter {
       cwd: process.cwd()
     };
 
-    this.child = fork(path.join(__dirname, 'child'), process.argv, options);
+    this.child = fork(Path.join(__dirname, 'child'), process.argv, options);
 
     if (this.watchedPaths.size > 0) {
       this.sendCommand('add', [Array.from(this.watchedPaths)]);
@@ -47,13 +49,9 @@ class Watcher extends EventEmitter {
       options: this.options
     });
 
-    this.child.on('message', msg => this.emit(msg.event, msg.path));
-
-    this.child.on('error', e => {
-      // Do nothing
-    });
-
-    this.child.on('exit', (exit, signal) => {
+    this.child.on('message', msg => this.handleEmit(msg.event, msg.path));
+    this.child.on('error', noop);
+    this.child.on('exit', () => {
       if (!this.closed) {
         // Restart the child
         this.child = null;
@@ -64,20 +62,29 @@ class Watcher extends EventEmitter {
     });
   }
 
-  sendCommand(f, args) {
-    if (!this.ready) {
-      return this.readyQueue.push(() => this.sendCommand(f, args));
+  handleEmit(event, data) {
+    if (event === 'watcherError') {
+      data = jsonToError(data);
     }
+
+    this.emit(event, data);
+  }
+
+  sendCommand(func, args) {
+    if (!this.ready) {
+      return this.readyQueue.push(() => this.sendCommand(func, args));
+    }
+
     this.child.send({
       type: 'function',
-      name: f,
+      name: func,
       args: args
     });
   }
 
-  _addPath(p) {
-    if (!this.watchedPaths.has(p)) {
-      this.watchedPaths.add(p);
+  _addPath(path) {
+    if (!this.watchedPaths.has(path)) {
+      this.watchedPaths.add(path);
       return true;
     }
   }
@@ -85,8 +92,8 @@ class Watcher extends EventEmitter {
   add(paths) {
     let added = false;
     if (Array.isArray(paths)) {
-      for (let p of paths) {
-        added = !added ? this._addPath(p) : true;
+      for (let path of paths) {
+        added = !added ? this._addPath(path) : true;
       }
     } else {
       added = this._addPath(paths);
@@ -108,19 +115,18 @@ class Watcher extends EventEmitter {
 
   getWatched() {
     let watchList = {};
-    for (let p of this.watchedPaths) {
-      let key = this.options.cwd ? path.relative(this.options.cwd, p) : p;
-      // TODO: Implement _items so it's the same as chokidar's output
+    for (let path of this.watchedPaths) {
+      let key = this.options.cwd ? Path.relative(this.options.cwd, path) : path;
       watchList[key || '.'] = [];
     }
     return watchList;
   }
 
-  _closePath(p) {
-    if (this.watchedPaths.has(p)) {
-      this.watchedPaths.delete(p);
+  _closePath(path) {
+    if (this.watchedPaths.has(path)) {
+      this.watchedPaths.delete(path);
     }
-    this.sendCommand('_closePath', [p]);
+    this.sendCommand('_closePath', [path]);
   }
 
   close() {
@@ -134,8 +140,19 @@ class Watcher extends EventEmitter {
     if (!this.child) {
       return;
     }
+
     this.child.send({
       type: 'die'
+    });
+  }
+
+  _emulateChildError() {
+    if (!this.child) {
+      return;
+    }
+    
+    this.child.send({
+      type: 'emulate_error'
     });
   }
 }

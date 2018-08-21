@@ -1,13 +1,17 @@
 const { FSWatcher } = require('chokidar');
+const { errorToJson } = require('./errorUtils');
 const optionsTransfer = require('./options');
 
 let watcher;
-
 function sendEvent(event, path) {
   process.send({
     event: event,
     path: path
   });
+}
+
+function handleError(e) {
+  sendEvent('watcherError', errorToJson(e));
 }
 
 function init(options) {
@@ -19,11 +23,11 @@ function init(options) {
   sendEvent('ready');
 }
 
-function executeFunction(functionName, args) {
+async function executeFunction(functionName, args) {
   try {
-    watcher[functionName](...args);
+    await watcher[functionName](...args);
   } catch (e) {
-    // Do nothing
+    handleError(e);
   }
 }
 
@@ -38,13 +42,12 @@ process.on('message', (msg) => {
     case 'die':
       process.exit();
       break;
+    case 'emulate_error':
+      throw new Error('this is an emulated error');
   }
 });
 
-process.on('error', e => {
-  // Do nothing
-});
-
+process.on('error', handleError);
 process.on('disconnect', () => {
   process.exit();
 });
