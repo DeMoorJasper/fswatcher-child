@@ -17,15 +17,13 @@ function handleError(e) {
 function init(options) {
   options = optionsTransfer.decode(options);
   watcher = new FSWatcher(options);
-  watcher.on('all', (event, path) => {
-    sendEvent(event, path);
-  });
+  watcher.on('all', sendEvent);
   sendEvent('ready');
 }
 
-async function executeFunction(functionName, args) {
+function executeFunction(functionName, args) {
   try {
-    await watcher[functionName](...args);
+    watcher[functionName](...args);
   } catch (e) {
     handleError(e);
   }
