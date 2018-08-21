@@ -13,10 +13,10 @@ function encode(options) {
       const valueType = type(value)
       if (valueType === 'RegExp') {
         options.ignored[index] = value.source;
-        if (!options.__regIndexs) {
-          options.__regIndexs = [];
+        if (!options._regIndexs) {
+          options._regIndexs = [];
         }
-        options.__regIndexs.push(index);
+        options._regIndexs.push(index);
       }
     });
   }
@@ -25,13 +25,13 @@ function encode(options) {
 }
 
 function decode(options) {
-  if (options && options.ignored && options.__regIndexs) {
-    for (let index of options.__regIndexs) {
+  if (options && options.ignored && options._regIndexs) {
+    for (let index of options._regIndexs) {
       options.ignored[index] = new RegExp(options.ignored[index]);
     }
   }
 
-  delete options.__regIndexs;
+  delete options._regIndexs;
 
   return options;
 }
