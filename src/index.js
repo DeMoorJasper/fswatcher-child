@@ -51,15 +51,19 @@ class Watcher extends EventEmitter {
 
     this.child.on('message', msg => this.handleEmit(msg.event, msg.path));
     this.child.on('error', noop);
-    this.child.on('exit', () => {
-      if (!this.closed) {
-        // Restart the child
-        this.child = null;
-        this.ready = false;
-        this.startchild();
-        this.emit('childDead');
-      }
-    });
+    this.child.on('exit', () => this.handleClosed());
+    // this.child.on('close', () => this.handleClosed());
+  }
+
+  handleClosed() {
+    if (!this.closed) {
+      // Restart the child
+      this.child = null;
+      this.ready = false;
+      this.startchild();
+    }
+
+    this.emit('childDead');
   }
 
   handleEmit(event, data) {
@@ -131,8 +135,11 @@ class Watcher extends EventEmitter {
 
   close() {
     this.closed = true;
+
     if (this.child) {
       this.child.kill();
+
+      return new Promise(resolve => this.once('childDead', resolve));
     }
   }
 
@@ -150,7 +157,7 @@ class Watcher extends EventEmitter {
     if (!this.child) {
       return;
     }
-    
+
     this.child.send({
       type: 'emulate_error'
     });
