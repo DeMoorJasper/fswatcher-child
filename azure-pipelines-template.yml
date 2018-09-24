@@ -16,7 +16,7 @@ jobs:
     inputs:
       versionSpec: $(node_version)
     displayName: 'Install Node.js'
-   - script: yarn
+  - script: yarn
     displayName: 'Install dependencies'
   - script: yarn test
     displayName: 'Run tests'
