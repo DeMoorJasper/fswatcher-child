@@ -2,6 +2,7 @@ const FSWatcher = require('../src/index');
 const fs = require('fs-extra');
 const path = require('path');
 const assert = require('assert');
+const {sleep} = require('./utils');
 
 describe('options', function() {
   let tmpFolder = path.join(__dirname, './tmp/');
@@ -19,20 +20,25 @@ describe('options', function() {
     await fs.writeFile(filepath, 'this is a text document');
 
     watcher.add(filepath);
+
     let changed = false;
     watcher.once('change', () => {
       changed = true;
     });
+
     if (!watcher.ready) {
       await new Promise(resolve => watcher.once('ready', resolve));
     }
-    await new Promise(resolve => setTimeout(resolve, 250));
+
+    await sleep(250);
+
     await fs.writeFile(filepath, 'this is not a text document');
-    await new Promise(resolve => setTimeout(resolve, 500));
+
+    await sleep(500);
 
     assert(!changed, 'File should not be flagged as changed.');
 
-    watcher.close();
+    await watcher.close();
   });
 
   it('Should pass init options with a more complex ignored regex', async () => {
@@ -60,7 +66,7 @@ describe('options', function() {
       await new Promise(resolve => watcher.once('ready', resolve));
     }
 
-    await new Promise(resolve => setTimeout(resolve, 250));
+    await sleep(250);
 
     for (let filepath of filepaths) {
       await fs.writeFile(filepath, 'this is not a text document');
@@ -68,11 +74,11 @@ describe('options', function() {
       watcher.add(filepath);
     }
     
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await sleep(500);
 
     assert(!changed, 'File should not be flagged as changed.');
 
-    watcher.close();
+    await watcher.close();
   });
 
   it('Should not ignore any files outside of the regex', async () => {
@@ -101,7 +107,7 @@ describe('options', function() {
       await new Promise(resolve => watcher.once('ready', resolve));
     }
 
-    await new Promise(resolve => setTimeout(resolve, 250));
+    await sleep(250);
 
     for (let filepath of filepaths) {
       await fs.writeFile(filepath, 'this is not a text document');
@@ -109,10 +115,10 @@ describe('options', function() {
       watcher.add(filepath);
     }
     
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await sleep(500);
 
     assert.equal(changed, 1, 'One file should have changed once.');
 
-    watcher.close();
+    await watcher.close();
   });
 });

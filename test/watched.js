@@ -15,9 +15,11 @@ describe('watched paths', function() {
 
     let filepath = path.join(tmpFolder, 'file1.txt');
     await fs.writeFile(filepath, 'this is a text document');
+
     watcher.add(filepath);
+
     assert(Object.keys(watcher.getWatched())[0] === filepath, 'getWatched should return all the watched paths.');
 
-    watcher.close();
+    await watcher.close();
   });
 });
