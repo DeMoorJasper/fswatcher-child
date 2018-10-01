@@ -57,7 +57,7 @@ describe('change event', function() {
     if (!watcher.ready) {
       await new Promise(resolve => watcher.once('ready', resolve));
     }
-    
+
     await sleep(250);
 
     await fs.writeFile(filepath, 'this is not a text document');
@@ -84,7 +84,7 @@ describe('change event', function() {
     watcher.once('change', () => {
       changed = true;
     });
-    
+
     if (!watcher.ready) {
       await new Promise(resolve => watcher.once('ready', resolve));
     }
@@ -94,7 +94,7 @@ describe('change event', function() {
     watcher.unwatch(filepath);
 
     await fs.writeFile(filepath, 'this is not a text document');
-    
+
     await sleep(500);
 
     assert(!changed, 'Should not have emitted a change event.');

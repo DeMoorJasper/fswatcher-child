@@ -25,9 +25,8 @@ describe('error handling', function() {
       changed = true;
     });
 
-    watcher.on('watcherError', e => {
-      console.log(e);
-    });
+    let hasThrown = false;
+    watcher.on('watcherError', () => (hasThrown = true));
 
     if (!watcher.ready) {
       await new Promise(resolve => watcher.once('ready', resolve));
@@ -38,7 +37,7 @@ describe('error handling', function() {
     watcher._emulateChildDead();
 
     await sleep(1000);
-    
+
     await fs.writeFile(filepath, 'this is not a text document');
 
     await sleep(500);
@@ -46,6 +45,8 @@ describe('error handling', function() {
     assert(changed, 'Should have emitted a change event.');
 
     await watcher.close();
+
+    assert(hasThrown);
   });
 
   it('Should restart child process on errors', async () => {

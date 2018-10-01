@@ -5,13 +5,13 @@ function type(options) {
 function encode(options) {
   if (options && options.ignored) {
     const ignoredType = type(options.ignored);
-    if (ignoredType !== 'Array') {
+    if (ignoredType !== "Array") {
       options.ignored = [options.ignored];
     }
 
     options.ignored.forEach((value, index) => {
-      const valueType = type(value)
-      if (valueType === 'RegExp') {
+      const valueType = type(value);
+      if (valueType === "RegExp") {
         options.ignored[index] = value.source;
         if (!options._regIndexs) {
           options._regIndexs = [];
