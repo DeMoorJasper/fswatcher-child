@@ -46,11 +46,8 @@ describe('options', function() {
       ignored: /file|config/
     });
 
-    let filepaths = [
-      path.join(tmpFolder, 'file1.txt'), 
-      path.join(tmpFolder, 'config.json')
-    ];
-    
+    let filepaths = [path.join(tmpFolder, 'file1.txt'), path.join(tmpFolder, 'config.json')];
+
     for (let filepath of filepaths) {
       await fs.writeFile(filepath, 'this is a text document');
 
@@ -73,7 +70,7 @@ describe('options', function() {
 
       watcher.add(filepath);
     }
-    
+
     await sleep(500);
 
     assert(!changed, 'File should not be flagged as changed.');
@@ -87,11 +84,11 @@ describe('options', function() {
     });
 
     let filepaths = [
-      path.join(tmpFolder, 'file1.txt'), 
+      path.join(tmpFolder, 'file1.txt'),
       path.join(tmpFolder, 'config.json'),
       path.join(tmpFolder, 'something')
     ];
-    
+
     for (let filepath of filepaths) {
       await fs.writeFile(filepath, 'this is a text document');
 
@@ -114,7 +111,7 @@ describe('options', function() {
 
       watcher.add(filepath);
     }
-    
+
     await sleep(500);
 
     assert.equal(changed, 1, 'One file should have changed once.');
