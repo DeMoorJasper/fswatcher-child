@@ -1,9 +1,9 @@
-const fork = require("child_process").fork;
-const { EventEmitter } = require("events");
-const { noop } = require("./utils");
-const { jsonToError } = require("./errorUtils");
-const Path = require("path");
-const optionsTransfer = require("./options");
+const fork = require('child_process').fork;
+const {EventEmitter} = require('events');
+const {noop} = require('./utils');
+const {jsonToError} = require('./errorUtils');
+const Path = require('path');
+const optionsTransfer = require('./options');
 
 class Watcher extends EventEmitter {
   constructor(options = {}) {
@@ -14,7 +14,7 @@ class Watcher extends EventEmitter {
     this.ready = false;
     this.readyQueue = [];
 
-    this.on("ready", () => {
+    this.on('ready', () => {
       this.ready = true;
       for (let func of this.readyQueue) {
         func();
@@ -28,9 +28,7 @@ class Watcher extends EventEmitter {
   startchild() {
     if (this.child) return;
 
-    let filteredArgs = process.execArgv.filter(
-      v => !/^--(debug|inspect)/.test(v)
-    );
+    let filteredArgs = process.execArgv.filter(v => !/^--(debug|inspect)/.test(v));
 
     let options = {
       execArgv: filteredArgs,
@@ -38,20 +36,20 @@ class Watcher extends EventEmitter {
       cwd: process.cwd()
     };
 
-    this.child = fork(Path.join(__dirname, "child"), process.argv, options);
+    this.child = fork(Path.join(__dirname, 'child'), process.argv, options);
 
     if (this.watchedPaths.size > 0) {
-      this.sendCommand("add", [Array.from(this.watchedPaths)]);
+      this.sendCommand('add', [Array.from(this.watchedPaths)]);
     }
 
     this.child.send({
-      type: "init",
+      type: 'init',
       options: this.options
     });
 
-    this.child.on("message", msg => this.handleEmit(msg.event, msg.path));
-    this.child.on("error", noop);
-    this.child.on("exit", () => this.handleClosed());
+    this.child.on('message', msg => this.handleEmit(msg.event, msg.path));
+    this.child.on('error', noop);
+    this.child.on('exit', () => this.handleClosed());
     // this.child.on('close', () => this.handleClosed());
   }
 
@@ -63,11 +61,11 @@ class Watcher extends EventEmitter {
       this.startchild();
     }
 
-    this.emit("childDead");
+    this.emit('childDead');
   }
 
   handleEmit(event, data) {
-    if (event === "watcherError") {
+    if (event === 'watcherError') {
       data = jsonToError(data);
     }
 
@@ -80,7 +78,7 @@ class Watcher extends EventEmitter {
     }
 
     this.child.send({
-      type: "function",
+      type: 'function',
       name: func,
       args: args
     });
@@ -102,7 +100,7 @@ class Watcher extends EventEmitter {
     } else {
       added = this._addPath(paths);
     }
-    if (added) this.sendCommand("add", [paths]);
+    if (added) this.sendCommand('add', [paths]);
   }
 
   unwatch(paths) {
@@ -114,14 +112,14 @@ class Watcher extends EventEmitter {
     } else {
       removed = this.watchedPaths.delete(paths);
     }
-    if (removed) this.sendCommand("unwatch", [paths]);
+    if (removed) this.sendCommand('unwatch', [paths]);
   }
 
   getWatched() {
     let watchList = {};
     for (let path of this.watchedPaths) {
       let key = this.options.cwd ? Path.relative(this.options.cwd, path) : path;
-      watchList[key || "."] = [];
+      watchList[key || '.'] = [];
     }
     return watchList;
   }
@@ -130,7 +128,7 @@ class Watcher extends EventEmitter {
     if (this.watchedPaths.has(path)) {
       this.watchedPaths.delete(path);
     }
-    this.sendCommand("_closePath", [path]);
+    this.sendCommand('_closePath', [path]);
   }
 
   close() {
@@ -139,7 +137,7 @@ class Watcher extends EventEmitter {
     if (this.child) {
       this.child.kill();
 
-      return new Promise(resolve => this.once("childDead", resolve));
+      return new Promise(resolve => this.once('childDead', resolve));
     }
   }
 
@@ -149,7 +147,7 @@ class Watcher extends EventEmitter {
     }
 
     this.child.send({
-      type: "die"
+      type: 'die'
     });
   }
 
@@ -159,7 +157,7 @@ class Watcher extends EventEmitter {
     }
 
     this.child.send({
-      type: "emulate_error"
+      type: 'emulate_error'
     });
   }
 }
