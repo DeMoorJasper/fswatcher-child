@@ -46,6 +46,7 @@ process.on("message", msg => {
 });
 
 process.on("error", handleError);
+process.on("uncaughtException", handleError);
 process.on("disconnect", () => {
   process.exit();
 });
